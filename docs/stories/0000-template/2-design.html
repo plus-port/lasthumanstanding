@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Story NNNN — design</title>
+    <!--
+      Design mockup for one story. Plain HTML and CSS, no build step, no external files.
+      Open it in a browser straight from the repo. One <section class="screen"> per screen
+      named in 2-design.md; inside it, one <div class="state"> per state the screen has.
+      Labels use docs/domain.md terms verbatim.
+    -->
+    <style>
+      :root {
+        --ink: #1f2933;
+        --muted: #616e7c;
+        --line: #d9e2ec;
+        --paper: #f5f7fa;
+        --ready: #147d64;
+        --gap: #ba2525;
+        font-family: system-ui, sans-serif;
+        color: var(--ink);
+      }
+      body {
+        margin: 0;
+        background: var(--paper);
+      }
+      header,
+      main {
+        max-width: 960px;
+        margin: 0 auto;
+        padding: 1rem;
+      }
+      header p {
+        color: var(--muted);
+        margin: 0.25rem 0;
+      }
+      nav a {
+        margin-right: 1rem;
+      }
+      .screen {
+        background: white;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 1rem;
+        margin: 1.5rem 0;
+      }
+      .screen > h2 {
+        margin-top: 0;
+      }
+      .meta {
+        color: var(--muted);
+        font-size: 0.9rem;
+      }
+      .state {
+        border-top: 1px dashed var(--line);
+        padding: 1rem 0;
+      }
+      .state > h3 {
+        margin: 0 0 0.5rem;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--muted);
+      }
+      table {
+        border-collapse: collapse;
+        width: 100%;
+      }
+      th,
+      td {
+        text-align: left;
+        border-bottom: 1px solid var(--line);
+        padding: 0.4rem 0.5rem;
+      }
+      .ready {
+        color: var(--ready);
+        font-weight: 600;
+      }
+      .gap {
+        color: var(--gap);
+        font-weight: 600;
+      }
+      button {
+        font: inherit;
+        padding: 0.4rem 0.8rem;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Story NNNN — &lt;Story title&gt;</h1>
+      <p>
+        Step 2 · Design · Owner: Designer · Notes and Done when list in <code>2-design.md</code>
+      </p>
+      <nav>
+        <a href="#screen-1">Screen 1</a>
+        <a href="#screen-2">Screen 2</a>
+      </nav>
+    </header>
+
+    <main>
+      <!-- Copy this section once per screen. Keep the id in step with the table in 2-design.md. -->
+      <section class="screen" id="screen-1">
+        <h2>&lt;Screen name&gt;</h2>
+        <p class="meta">
+          Route: <code>/&lt;route&gt;</code> · Covers criteria: 1, 2 · Components: &lt;reused or
+          new&gt;
+        </p>
+
+        <div class="state">
+          <h3>Ready</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Employee</th>
+                <th>Role</th>
+                <th>Readiness</th>
+                <th>Follow-up</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>&lt;Employee&gt;</td>
+                <td>&lt;Role&gt;</td>
+                <td class="ready">Ready</td>
+                <td>—</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="state">
+          <h3>Gap</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Employee</th>
+                <th>Role</th>
+                <th>Readiness</th>
+                <th>Follow-up</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>&lt;Employee&gt;</td>
+                <td>&lt;Role&gt;</td>
+                <td class="gap">Gap: &lt;Required Qualification&gt;</td>
+                <td><button>Assign course</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="state">
+          <h3>Empty</h3>
+          <p>No Employees match. &lt;What the manager does next.&gt;</p>
+        </div>
+
+        <div class="state">
+          <h3>Loading</h3>
+          <p>Loading Readiness for &lt;Site&gt;…</p>
+        </div>
+
+        <div class="state">
+          <h3>Error</h3>
+          <p>Readiness could not be computed. &lt;Cause and the action offered.&gt;</p>
+        </div>
+      </section>
+
+      <section class="screen" id="screen-2">
+        <h2>&lt;Screen name&gt;</h2>
+        <p class="meta">
+          Route: <code>/&lt;route&gt;</code> · Covers criteria: 3 · Components: &lt;reused or
+          new&gt;
+        </p>
+        <div class="state">
+          <h3>Default</h3>
+          <p>&lt;Layout for this screen.&gt;</p>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

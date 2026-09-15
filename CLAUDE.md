@@ -39,7 +39,7 @@ How a story travels from idea to shipped. Each step is a separate task with one 
 | Step             | Owner                                   | Starts when                 | Produces                                                                                                                                      | Done when                                                           |
 | ---------------- | --------------------------------------- | --------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------- |
 | 1 Story          | Product Owner                           | an idea is worth building   | `1-story.md`: user story, manager question and numbered acceptance criteria in the language of `docs/domain.md`                               | every acceptance criterion reads as a test                          |
-| 2 Design         | Designer                                | `1-story.md` is ticked      | `2-design.md`: a screen or "no UI" note per criterion, states, copy, linked design file (tool: `TODO(project)`, default Figma)                | every acceptance criterion has a screen or an explicit "no UI" note |
+| 2 Design         | Designer                                | `1-story.md` is ticked      | `2-design.md` notes and `2-design.html` mockup: a screen or "no UI" note per criterion, states, copy, as a plain HTML page in the folder      | every acceptance criterion has a screen or an explicit "no UI" note |
 | 3 Refinement     | Product Owner with the Development team | `2-design.md` is ticked     | `3-refinement.md`: PO approval of the design, open questions answered, the story split into vertical slices                                   | each slice has a test or observable outcome attached                |
 | 4 Implementation | Development team                        | `3-refinement.md` is ticked | `4-implementation.md` and a merge request naming the story folder, built one slice at a time: orient, thin end-to-end slice, run, widen, gate | the gate is green and every section 3 artifact exists               |
 | 5 Review         | Product Owner                           | the merge request is green  | `5-review.md`: criteria walk, design check and verdict; open rows return the story to step 3                                                  | the PO has accepted the merge request                               |
@@ -64,13 +64,13 @@ Pipeline runs on GitLab CI for every push and merge request. Review approvals re
 
 Every step ends in one file in the story folder, copied from `docs/stories/0000-template/`; the folder is the issue, and `docs/stories/README.md` holds the rules. A step is finished when its file exists and every box in its _Done when_ list is ticked by the step's owner. Nothing here is optional: a missing file is an **Ask** (section 5), never a guess.
 
-| Step | File                  | Carries                                                                                   |
-| ---- | --------------------- | ----------------------------------------------------------------------------------------- |
-| 1    | `1-story.md`          | user story, manager question, numbered acceptance criteria tagged must-ship, out of scope |
-| 2    | `2-design.md`         | design link, screen per criterion, states, copy, components, open questions               |
-| 3    | `3-refinement.md`     | design approval, answers, vertical slices with their checks, decisions expected           |
-| 4    | `4-implementation.md` | slice log, change summary, demo path, records produced, the gate command quoted           |
-| 5    | `5-review.md`         | criteria walk, design check, verdict                                                      |
+| Step | File                  | Carries                                                                                                    |
+| ---- | --------------------- | ---------------------------------------------------------------------------------------------------------- |
+| 1    | `1-story.md`          | user story, manager question, numbered acceptance criteria tagged must-ship, out of scope                  |
+| 2    | `2-design.md`         | screen per criterion, states, copy, components, open questions; the screens themselves are `2-design.html` |
+| 3    | `3-refinement.md`     | design approval, answers, vertical slices with their checks, decisions expected                            |
+| 4    | `4-implementation.md` | slice log, change summary, demo path, records produced, the gate command quoted                            |
+| 5    | `5-review.md`         | criteria walk, design check, verdict                                                                       |
 
 Step 4 also owes, outside the story folder:
 
