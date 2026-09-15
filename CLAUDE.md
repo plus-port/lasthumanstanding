@@ -14,23 +14,23 @@ This is the contract between the team and the agent. The few slots marked `TODO(
 
 ### 1 Systems
 
-The map of what this repo touches and how far the agent may reach into each.
+What the system is, technically, in one screen.
 
-| System                                                   | Role                                             | Ownership | Change policy                                                                                             |
-| -------------------------------------------------------- | ------------------------------------------------ | --------- | --------------------------------------------------------------------------------------------------------- |
-| Astro 7, server output, Node standalone adapter          | the application: pages, Actions, components      | owned     | change freely within sections 4–5; shape in `docs/architecture.md`                                        |
-| libSQL via Drizzle (SQLite file locally)                 | persistence                                      | owned     | schema changes ship with a generated migration in `drizzle/` and a **decision** (section 5)               |
-| Other teams' repos                                       | sibling builds of the same challenge             | consumed  | share the harness (this file and `docs/`) freely; share code only through a contract in `docs/contracts/` |
-| Legacy inputs: training spreadsheets, certificate emails | today's source of truth, tomorrow's import       | consumed  | import adapters sit behind one boundary so the legacy shape never reaches the domain                      |
-| GitLab CI (`.gitlab-ci.yml`)                             | runs `pnpm gate` on every push and merge request | owned     | keep it identical to the local gate; a new gate step is added in both places in one change                |
-| `TODO(project)` deploy target                            | where the built server runs                      | shared    | infra changes are proposed, never applied, by the agent                                                   |
+**Shape.** One deployable: an Astro 7 application that renders every page on the server (`output: 'server'`) through the `@astrojs/node` standalone adapter. `pnpm build` emits `dist/server/entry.mjs`, a plain Node HTTP server, plus static assets in `dist/client/`. Requires Node 22.12 or newer. The dev server listens on `http://localhost:4321`. Astro sessions use filesystem storage by default with this adapter; that is where a login session will live.
 
-Rules that hold regardless of stack:
+**Request path.** Browser → page in `src/pages/` → Astro Action in `src/actions/` for any mutation → pure rules in `src/domain/` → Drizzle queries in `src/db/`. Domain code performs no I/O. Readiness is computed per request from Roles, Required Qualifications and Certificates on the date asked, and is never stored.
 
-- **Owned** means the agent may change internals and interfaces, with tests proving the change.
-- **Consumed** means the agent adapts to the contract as documented or observed. When the contract is unclear, the agent records the assumption in the handoff (section 3) rather than guessing silently.
-- **Shared** means humans apply the change; the agent produces the diff or runbook.
-- **Cross-repo identity**: every reference to another team's data uses the stable identifier from its contract. Names are display data, never keys.
+**Data.** libSQL through Drizzle ORM. Locally a single SQLite file at `data/northstar.db`, chosen by `DATABASE_URL` (default `file:./data/northstar.db`); when deployed, a libSQL or Turso URL with the same schema. The schema is TypeScript in `src/db/schema.ts`; drizzle-kit generates SQL migrations into `drizzle/` and applies them with `pnpm db:migrate`. Primary keys are opaque text identifiers, timestamps are integer epoch seconds. Tables today: `sites`, `employees`. SQLite is single-writer; at 600 employees and 8 sites this is not a constraint, and a move to Postgres is a driver swap plus a decision record.
+
+**Inputs.** Today's source of truth is spreadsheets and emailed certificate documents. They will enter through import adapters in `src/actions/` that translate rows and files into domain types. Nothing downstream of an adapter knows a spreadsheet existed.
+
+**Tooling.** TypeScript 6 in strict mode checked by `astro check`, ESLint 10 with `eslint-plugin-astro`, Prettier 3 with the Astro plugin, Vitest 5 for unit tests. `pnpm gate` runs them in sequence. GitLab CI runs the identical command in a `node:22` image on every push and merge request. Deploy target: `TODO(project)`.
+
+**Ownership.** Everything above is owned by this team and changeable within sections 4–5, with three exceptions:
+
+- Schema changes ship with a generated migration and a decision record.
+- Infrastructure and deploy configuration are proposed by the agent, applied by a human.
+- Other teams' repos are sibling builds of the same challenge. Share this file and `docs/` freely; share code only through a contract in `docs/contracts/`, keyed by stable identifiers, never names.
 
 ### 2 Current pipeline
 
