@@ -2,26 +2,35 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Harness agreement — <team> · <project>
+## Harness agreement — <team> · Northstar Logistics
 
-This is the contract between the team and the agent. Slots marked `TODO(project)` are filled once the project lands; everything else is in force now. Keep the file to one screen per section: when a section grows, push detail into `docs/` and leave a one-line pointer here.
+This is the contract between the team and the agent. The few slots marked `TODO(project)` need a human answer; everything else is in force now. Keep the file to one screen per section: when a section grows, push detail into `docs/` and leave a one-line pointer here.
+
+**Mission.** Northstar Logistics: 600 employees across 8 sites, a new contract in 6 weeks. Training lives in spreadsheets and certificates arrive by email, so managers cannot see who is ready for which work. The system answers one question: _is this employee ready for this work, and if not, what is missing?_ Three teams each build three connected features in separate repos. This harness is the reusable part; it travels with each repo.
+
+**Domain language** is in `docs/domain.md`. Read it before touching any model, and use its terms verbatim in code, tests and commits.
+
+**Features this repo owns:** all six — People & roles, Training catalogue, Learning assignments, Knowledge checks, Certificates & renewals, Manager overview. The seam between the learning chain and the readiness chain is kept explicit in `docs/contracts/` so any feature can move to another team's repo later without redesign.
 
 ### 1 Systems
 
 The map of what this repo touches and how far the agent may reach into each.
 
-| System | Role | Ownership | Change policy |
-|---|---|---|---|
-| `TODO(project)` runtime + framework | the application itself | owned | change freely within sections 4–5 |
-| `TODO(project)` primary data store | persistence | owned | schema changes go through a migration and a **decision** (section 5) |
-| `TODO(project)` external services | consumed APIs, auth, messaging | consumed | contract-only: change our client, treat their behaviour as fixed |
-| `TODO(project)` deploy target | where it runs | shared | infra changes are proposed, never applied, by the agent |
+| System                                                   | Role                                             | Ownership | Change policy                                                                                             |
+| -------------------------------------------------------- | ------------------------------------------------ | --------- | --------------------------------------------------------------------------------------------------------- |
+| Astro 7, server output, Node standalone adapter          | the application: pages, Actions, components      | owned     | change freely within sections 4–5; shape in `docs/architecture.md`                                        |
+| libSQL via Drizzle (SQLite file locally)                 | persistence                                      | owned     | schema changes ship with a generated migration in `drizzle/` and a **decision** (section 5)               |
+| Other teams' repos                                       | sibling builds of the same challenge             | consumed  | share the harness (this file and `docs/`) freely; share code only through a contract in `docs/contracts/` |
+| Legacy inputs: training spreadsheets, certificate emails | today's source of truth, tomorrow's import       | consumed  | import adapters sit behind one boundary so the legacy shape never reaches the domain                      |
+| GitLab CI (`.gitlab-ci.yml`)                             | runs `pnpm gate` on every push and merge request | owned     | keep it identical to the local gate; a new gate step is added in both places in one change                |
+| `TODO(project)` deploy target                            | where the built server runs                      | shared    | infra changes are proposed, never applied, by the agent                                                   |
 
 Rules that hold regardless of stack:
 
 - **Owned** means the agent may change internals and interfaces, with tests proving the change.
 - **Consumed** means the agent adapts to the contract as documented or observed. When the contract is unclear, the agent records the assumption in the handoff (section 3) rather than guessing silently.
 - **Shared** means humans apply the change; the agent produces the diff or runbook.
+- **Cross-repo identity**: every reference to another team's data uses the stable identifier from its contract. Names are display data, never keys.
 
 ### 2 Current pipeline
 
@@ -33,17 +42,21 @@ The loop the agent runs on every task. Each step ends on a checkable state.
 4. **Verify with the real gate** — run the same commands CI runs, locally, before declaring anything finished. Done when the gate is green or the failure is reported verbatim.
 5. **Hand off** — produce the artifacts in section 3.
 
-CI gate (`TODO(project)` — the exact commands live in the project's manifest; this table caches only what the manifest cannot say):
+The gate. `pnpm gate` runs every row below in order and is what CI runs; the scripts in `package.json` are the source of truth.
 
-| Gate | Command | Must pass before |
-|---|---|---|
-| build | `TODO(project)` | every handoff |
-| unit tests | `TODO(project)` | every handoff |
-| single test | `TODO(project)` | iterating on one failure |
-| lint + format | `TODO(project)` | every handoff |
-| type check | `TODO(project)` | every handoff |
+| Gate                | Command                                                                     | Use it when                      |
+| ------------------- | --------------------------------------------------------------------------- | -------------------------------- |
+| whole gate          | `pnpm gate`                                                                 | before every handoff             |
+| type check          | `pnpm check`                                                                | after touching `.astro` or `.ts` |
+| lint                | `pnpm lint`                                                                 | after any code change            |
+| format              | `pnpm format` to fix, `pnpm format:check` to verify                         | before committing                |
+| unit tests          | `pnpm test`                                                                 | after any domain change          |
+| single test file    | `pnpm vitest run src/domain/certificate.test.ts`                            | iterating on one failure         |
+| single test by name | `pnpm vitest run -t "never expires"`                                        | iterating on one case            |
+| build               | `pnpm build`                                                                | last step of the gate            |
+| migration           | `pnpm db:generate` after editing `src/db/schema.ts`, then `pnpm db:migrate` | every schema change              |
 
-Where the pipeline runs: `TODO(project)` (GitHub Actions / Azure DevOps / other). Review approvals required: `TODO(project)`.
+Pipeline runs on GitLab CI for every push and merge request. Review approvals required: `TODO(project)`.
 
 ### 3 Handoff artifacts
 
@@ -51,11 +64,12 @@ Work is finished when every item below exists. Nothing here is optional.
 
 - **Green working tree** — the gate in section 2 passed on the final state, and the agent quotes the command it ran.
 - **Change summary** in this shape, in the PR description or final message:
-  - *What changed* — files and behaviour, one line each.
-  - *Why* — the task and the decision path, including alternatives rejected.
-  - *How verified* — commands run and their result.
-  - *Left open* — anything skipped, assumed, or needing a human, stated explicitly.
-- **Decision record** in `docs/decisions/` whenever the work chose between architectures, introduced a dependency, changed a schema, or altered a public interface. One file per decision, dated, with context, decision, consequences.
+  - _What changed_ — files and behaviour, one line each.
+  - _Why_ — the task and the decision path, including alternatives rejected.
+  - _How verified_ — commands run and their result.
+  - _Left open_ — anything skipped, assumed, or needing a human, stated explicitly.
+- **Decision record** in `docs/decisions/` (copy `0000-template.md`) whenever the work chose between architectures, introduced a dependency, changed a schema, or altered a public interface. One file per decision, dated, with context, decision, consequences.
+- **Contract revision** in `docs/contracts/` whenever a shape another team consumes changed, with the version bumped and an example payload.
 - **Docs kept true** — any README, runbook, or this file that described the old behaviour now describes the new one.
 - **Commit trailer** — every commit ends with `Co-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>`.
 
@@ -70,17 +84,19 @@ The architectural stance. These decide ties.
 - **Configuration is code.** A new flag or environment variable is a public interface and gets a decision record.
 - **Dependencies are decisions.** Adding one requires a decision record naming what it replaces and what it costs.
 - **Prefer the vertical slice.** A thin end-to-end path beats a complete layer with nothing above it.
+- **Readiness is computed.** Derive it from Roles, Qualifications and Certificates on the date asked. Storing it invites drift between repos.
+- **Six weeks.** Choose what ships a working slice to a manager this week over what might scale next year.
 
 ### 5 Responsibility
 
 Who decides what. When in doubt, the row below moves one tier up.
 
-| Tier | The agent… | Examples |
-|---|---|---|
-| **Act** | does it and reports it | code within owned systems, tests, refactors that keep behaviour, doc fixes, local tooling |
-| **Decide** | does it, and writes a decision record for review | new dependency, schema migration, public interface change, new config surface, removing a feature |
-| **Ask** | stops and states the question with a recommendation | anything touching production data or infrastructure, deleting user-facing functionality, changes outside this repo, cost-bearing services |
-| **Never** | | reads or writes customer data, places secrets in code, chat, or logs, force-pushes shared branches, disables a failing gate to get green |
+| Tier       | The agent…                                          | Examples                                                                                                                                                                      |
+| ---------- | --------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Act**    | does it and reports it                              | code within owned systems, tests, refactors that keep behaviour, doc fixes, local tooling                                                                                     |
+| **Decide** | does it, and writes a decision record for review    | new dependency, schema migration, public interface change, new config surface, removing a feature                                                                             |
+| **Ask**    | stops and states the question with a recommendation | anything touching production data or infrastructure, deleting user-facing functionality, changes to another team's contract, changes outside this repo, cost-bearing services |
+| **Never**  |                                                     | reads or writes customer data, places secrets in code, chat, or logs, force-pushes shared branches, disables a failing gate to get green                                      |
 
 Review accountability: `TODO(project)` — name the reviewer per area of the tree if it differs.
 
@@ -91,12 +107,17 @@ Conventions the tree cannot state for itself. Layout is discoverable; read the t
 - **Branches** — `TODO(project)` (default: `<type>/<ticket>-<short-slug>`).
 - **Commits** — `TODO(project)` (default: conventional commits, imperative subject under 72 chars, body explains why).
 - **PR size** — one concern per PR. Split rather than stack unrelated changes.
-- **Decision records** — `docs/decisions/NNNN-<slug>.md`.
+- **Decision records** — `docs/decisions/NNNN-<slug>.md`, template at `0000`.
+- **Contracts** — `docs/contracts/<shape>.md`, one file per cross-repo shape.
 - **Runbooks and design notes** — `docs/`.
-- **No-touch zones** — `TODO(project)` (generated code, vendored dependencies, migration history already applied).
-- **Local configuration** — `.env.local` and equivalents stay untracked; `.env.example` documents every variable with a placeholder value.
+- **Dev server** — start with `pnpm astro dev --background`; manage with `astro dev stop`, `astro dev status`, `astro dev logs`. Local URL is `http://localhost:4321`.
+- **No-touch zones** — `dist/`, `.astro/`, `pnpm-lock.yaml` by hand, and any migration in `drizzle/` that has been applied anywhere. A schema fix is a new migration.
+- **Local configuration** — `.env` stays untracked; `.env.example` documents every variable with a placeholder value. Today that is only `DATABASE_URL`.
+- **Agent files** — `CLAUDE.md` is the single harness; `AGENTS.md` only points here.
 
 Pointers to disclosed material, reached only when the task needs them:
 
-- Architecture overview → `docs/architecture.md` (`TODO(project)`).
-- Domain glossary → `docs/domain.md` (`TODO(project)`).
+- Domain glossary and feature map → `docs/domain.md`. Read before modelling anything.
+- Cross-repo shapes → `docs/contracts/`. Read before calling or exposing anything another team owns.
+- Module shape and dependency direction → `docs/architecture.md`. Read before adding a folder or crossing one.
+- Stack decision and its rejected alternatives → `docs/decisions/0001-astro-ssr-drizzle-libsql.md`.
