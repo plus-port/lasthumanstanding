@@ -22,6 +22,7 @@ docs/stories/
 - **Input is the previous file.** Each step reads the file before it, never the chat. If the input is missing or its list is open, the step does not start.
 - **Domain language.** Use the terms in `docs/domain.md` verbatim. A new term goes into the glossary before it appears in a story file.
 - **Sent back.** When review returns a story to step 3, the reviewer lists what is missing in `5-review.md`; steps 3 and 4 update their files in place and tick again.
+- **Security-sensitive surfaces.** A story touching auth, secrets, input parsing, or an import adapter (spreadsheets, certificates) gets a security row in step 5's Findings before the verdict, even when nothing is wrong.
 
 ## Working one step with the agent
 
