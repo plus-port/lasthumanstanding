@@ -3,8 +3,8 @@
 Step: 4 · Implementation
 Owner: Development team
 Input: `3-refinement.md` with its Done when list ticked
-Branch: `main` (workshop run; the Product Owner asked for the work to land on main)
-Merge request: none, committed directly to `main` at `6a656bd`
+Branch: `feat/0001-employees-roles-required-qualifications`
+Merge request: https://github.com/plus-port/lasthumanstanding/pull/1
 
 ## Slice log
 
@@ -31,7 +31,7 @@ Merge request: none, committed directly to `main` at `6a656bd`
   - Criterion 6 (remove a Role) is `nice-to-have` and shipped in slice 3.
   - Employee list role names are loaded with a second query per page rather than a join; fine at 600 Employees.
   - Deleting Qualifications and Roles, and editing names, are later stories.
-  - Nothing is pushed; the Product Owner decides when `main` goes to the remote.
+  - Merging the pull request is the Product Owner's step 5 verdict.
 
 ## Demo path
 
