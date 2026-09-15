@@ -1,0 +1,4 @@
+# Check out every text file with LF so the local gate matches CI (node:22 on Linux).
+* text=auto eol=lf
+*.png binary
+*.ico binary

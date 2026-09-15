@@ -1,0 +1,107 @@
+---
+// Employee: Roles held, their Required Qualifications, give and remove a Role. Story 0001, criteria 3 and 6.
+import { actions } from 'astro:actions';
+import Layout from '../../components/Layout.astro';
+import Notice from '../../components/Notice.astro';
+import { actionMessage } from '../../actions/message';
+import { requiredQualificationsFor } from '../../domain/role';
+import { findEmployee, listQualifications, listRoles } from '../../db/people';
+
+const { id = '' } = Astro.params;
+
+const result = Astro.getActionResult(actions.giveRole) ?? Astro.getActionResult(actions.removeRole);
+if (result && !result.error) {
+  return Astro.redirect(Astro.url.pathname);
+}
+const error = result?.error ? actionMessage(result.error) : null;
+
+const [employee, allRoles, qualifications] = await Promise.all([
+  findEmployee(id),
+  listRoles(),
+  listQualifications(),
+]);
+if (!employee) {
+  Astro.response.status = 404;
+}
+
+const nameOf = (qualificationId: string) =>
+  qualifications.find((q) => q.id === qualificationId)?.name ?? qualificationId;
+const heldIds = new Set(employee?.roles.map((r) => r.id));
+const availableRoles = allRoles.filter((r) => !heldIds.has(r.id));
+const required = employee ? requiredQualificationsFor(employee.roles) : [];
+---
+
+<Layout title={employee ? employee.fullName : 'Employee'}>
+  {!employee ? (
+    <Notice kind="error">
+      Employee not found. <a href="/employees">Back to Employees</a>.
+    </Notice>
+  ) : (
+    <>
+      <p class="meta">Site: {employee.site.name}</p>
+
+      {error && <Notice kind="error">{error}</Notice>}
+
+      {employee.roles.length === 0 ? (
+        <Notice>No Roles yet. Give a Role below.</Notice>
+      ) : (
+        <table>
+          <thead>
+            <tr>
+              <th>Role</th>
+              <th>Required Qualifications</th>
+              <th />
+            </tr>
+          </thead>
+          <tbody>
+            {employee.roles.map((role) => (
+              <tr>
+                <td>
+                  <a href={`/roles/${role.id}`}>{role.name}</a>
+                </td>
+                <td>
+                  {role.requiredQualificationIds.length > 0
+                    ? role.requiredQualificationIds.map(nameOf).join(', ')
+                    : '—'}
+                </td>
+                <td>
+                  <form class="compact" method="post" action={actions.removeRole}>
+                    <input type="hidden" name="employeeId" value={employee.id} />
+                    <input type="hidden" name="roleId" value={role.id} />
+                    <button>Remove</button>
+                  </form>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+
+      {employee.roles.length > 0 && (
+        <p>
+          <strong>Required Qualifications (all Roles):</strong>{' '}
+          {required.length > 0 ? required.map(nameOf).join(', ') : 'none'}
+        </p>
+      )}
+
+      {availableRoles.length === 0 ? (
+        <p class="meta">
+          Every Role is already held. <a href="/roles">Add a Role</a>.
+        </p>
+      ) : (
+        <form class="inline" method="post" action={actions.giveRole}>
+          <input type="hidden" name="employeeId" value={employee.id} />
+          <label>
+            Give Role
+            <select name="roleId" required>
+              {availableRoles.map((r) => (
+                <option value={r.id}>{r.name}</option>
+              ))}
+            </select>
+          </label>
+          <button>Give Role</button>
+        </form>
+      )}
+    </>
+  )}
+</Layout>

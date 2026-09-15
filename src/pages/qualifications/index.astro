@@ -1,0 +1,50 @@
+---
+// Qualifications: list and add a Qualification. Story 0001, criterion 5.
+import { actions } from 'astro:actions';
+import Layout from '../../components/Layout.astro';
+import Notice from '../../components/Notice.astro';
+import { actionMessage } from '../../actions/message';
+import { listQualifications, listRoles } from '../../db/people';
+
+const result = Astro.getActionResult(actions.addQualification);
+if (result && !result.error) {
+  return Astro.redirect('/qualifications');
+}
+const error = result?.error ? actionMessage(result.error) : null;
+
+const [qualifications, roles] = await Promise.all([listQualifications(), listRoles()]);
+const requiredBy = (qualificationId: string) =>
+  roles.filter((r) => r.requiredQualificationIds.includes(qualificationId)).length;
+---
+
+<Layout title="Qualifications">
+  {qualifications.length === 0 ? (
+    <Notice>No Qualifications yet. Add the first one below.</Notice>
+  ) : (
+    <table>
+      <thead>
+        <tr>
+          <th>Qualification</th>
+          <th>Required by Roles</th>
+        </tr>
+      </thead>
+      <tbody>
+        {qualifications.map((q) => (
+          <tr>
+            <td>{q.name}</td>
+            <td>{requiredBy(q.id)}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  )}
+
+  <form class="inline" method="post" action={actions.addQualification}>
+    <h2>Add Qualification</h2>
+    {error && <Notice kind="error">{error}</Notice>}
+    <label>
+      Name <input name="name" required />
+    </label>
+    <button>Add Qualification</button>
+  </form>
+</Layout>

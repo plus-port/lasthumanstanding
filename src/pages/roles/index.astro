@@ -1,0 +1,65 @@
+---
+// Roles: list and add a Role with its Required Qualifications. Story 0001, criterion 2.
+import { actions } from 'astro:actions';
+import Layout from '../../components/Layout.astro';
+import Notice from '../../components/Notice.astro';
+import { actionMessage } from '../../actions/message';
+import { listQualifications, listRoles } from '../../db/people';
+
+const result = Astro.getActionResult(actions.addRole);
+if (result && !result.error) {
+  return Astro.redirect(`/roles/${result.data.id}`);
+}
+const error = result?.error ? actionMessage(result.error) : null;
+
+const [roles, qualifications] = await Promise.all([listRoles(), listQualifications()]);
+---
+
+<Layout title="Roles">
+  {roles.length === 0 ? (
+    <Notice>No Roles yet. Add the first one below.</Notice>
+  ) : (
+    <table>
+      <thead>
+        <tr>
+          <th>Role</th>
+          <th>Required Qualifications</th>
+        </tr>
+      </thead>
+      <tbody>
+        {roles.map((r) => (
+          <tr>
+            <td>
+              <a href={`/roles/${r.id}`}>{r.name}</a>
+            </td>
+            <td>{r.requiredQualificationIds.length}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  )}
+
+  <form class="inline" method="post" action={actions.addRole}>
+    <h2>Add Role</h2>
+    {error && <Notice kind="error">{error}</Notice>}
+    <label>
+      Name <input name="name" required />
+    </label>
+    <fieldset>
+      <legend>Required Qualifications</legend>
+      {qualifications.length === 0 ? (
+        <p class="meta">
+          No Qualifications yet. <a href="/qualifications">Add one</a> first.
+        </p>
+      ) : (
+        qualifications.map((q) => (
+          <label class="check">
+            <input type="checkbox" name="requiredQualificationIds" value={q.id} />
+            {q.name}
+          </label>
+        ))
+      )}
+    </fieldset>
+    <button>Add Role</button>
+  </form>
+</Layout>

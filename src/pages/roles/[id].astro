@@ -1,0 +1,36 @@
+---
+// Role: its Required Qualifications. Story 0001, criterion 2.
+import Layout from '../../components/Layout.astro';
+import Notice from '../../components/Notice.astro';
+import { findRole, listQualifications } from '../../db/people';
+
+const { id = '' } = Astro.params;
+const [role, qualifications] = await Promise.all([findRole(id), listQualifications()]);
+if (!role) {
+  Astro.response.status = 404;
+}
+const nameOf = (qualificationId: string) =>
+  qualifications.find((q) => q.id === qualificationId)?.name ?? qualificationId;
+---
+
+<Layout title={role ? role.name : 'Role'}>
+  {!role ? (
+    <Notice kind="error">
+      Role not found. <a href="/roles">Back to Roles</a>.
+    </Notice>
+  ) : role.requiredQualificationIds.length === 0 ? (
+    <Notice>No Required Qualifications. Every Employee is ready for this Role by default.</Notice>
+  ) : (
+    <>
+      <h2>Required Qualifications</h2>
+      <ul>
+        {role.requiredQualificationIds.map((q) => (
+          <li>{nameOf(q)}</li>
+        ))}
+      </ul>
+    </>
+  )}
+  <p class="meta">
+    <a href="/roles">Back to Roles</a>
+  </p>
+</Layout>
