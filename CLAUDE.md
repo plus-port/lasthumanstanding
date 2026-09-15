@@ -34,13 +34,15 @@ Rules that hold regardless of stack:
 
 ### 2 Current pipeline
 
-How a change travels from idea to shipped. Five stages, each owned by one role and ending on a checkable state. The agent works inside the Development team stage; in the other stages it drafts when asked and the named role signs off.
+How a change travels from idea to shipped. Each step is a separate task with one owner, one input and one output, so steps run at different times and by different people. To work one step, name it: the agent reads the step's input, produces its output, and stops; the owner signs off before the next step starts. The agent works in step 4 by default and drafts any other step when asked.
 
-1. **Product Owner writes the story** — one idea as a user story with acceptance criteria, filed as a GitLab issue in the language of `docs/domain.md`. Done when every acceptance criterion can be read as a test.
-2. **Designer prepares the design** — screens and states for the story, linked from the issue (tool: `TODO(project)`, default Figma). Done when every acceptance criterion has a screen or an explicit "no UI" note.
-3. **Product Owner confirms the design and refines with the Development team** — the team walks the story and design together, splits it into vertical slices, and records open questions on the issue. Done when the PO has approved the design and each slice has a test or observable outcome attached.
-4. **Development team implements** — the agent's loop: orient on the touched modules and nearest tests, build one thin end-to-end slice, run it, widen, then run the gate below and prepare the handoff artifacts in section 3. Done when the gate is green on a merge request that names the issue.
-5. **Product Owner reviews the final change** — checks the merge request against the acceptance criteria and the approved design. Done when the PO accepts, or sends it back to stage 3 with what is missing.
+| Step             | Owner                                   | Starts when                | Produces                                                                                                                                   | Done when                                                           |
+| ---------------- | --------------------------------------- | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------- |
+| 1 Story          | Product Owner                           | an idea is worth building  | a GitLab issue: user story and acceptance criteria in the language of `docs/domain.md`                                                     | every acceptance criterion reads as a test                          |
+| 2 Design         | Designer                                | the issue exists           | screens and states for the story, linked from the issue (tool: `TODO(project)`, default Figma)                                             | every acceptance criterion has a screen or an explicit "no UI" note |
+| 3 Refinement     | Product Owner with the Development team | the design is linked       | PO approval of the design; the story split into vertical slices listed on the issue, open questions answered there                         | each slice has a test or observable outcome attached                |
+| 4 Implementation | Development team                        | the slices are listed      | a merge request naming the issue, built one slice at a time: orient, thin end-to-end slice, run, widen, gate, then the section 3 artifacts | the gate is green and every section 3 artifact exists               |
+| 5 Review         | Product Owner                           | the merge request is green | acceptance, or one comment per missing criterion that returns the issue to step 3                                                          | the PO has accepted the merge request                               |
 
 The gate. `pnpm gate` runs every row below in order and is what CI runs; the scripts in `package.json` are the source of truth.
 
