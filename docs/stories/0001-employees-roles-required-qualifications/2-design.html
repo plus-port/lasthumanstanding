@@ -1,0 +1,409 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Story 0001 — design</title>
+    <!--
+      Design mockup for story 0001. Plain HTML and CSS, no build step, no external files.
+      One <section class="screen"> per screen named in 2-design.md; inside it, one
+      <div class="state"> per state. Labels use docs/domain.md terms verbatim.
+    -->
+    <style>
+      :root {
+        --ink: #1f2933;
+        --muted: #616e7c;
+        --line: #d9e2ec;
+        --paper: #f5f7fa;
+        --ready: #147d64;
+        --gap: #ba2525;
+        font-family: system-ui, sans-serif;
+        color: var(--ink);
+      }
+      body {
+        margin: 0;
+        background: var(--paper);
+      }
+      header,
+      main {
+        max-width: 960px;
+        margin: 0 auto;
+        padding: 1rem;
+      }
+      header p {
+        color: var(--muted);
+        margin: 0.25rem 0;
+      }
+      nav a {
+        margin-right: 1rem;
+      }
+      .screen {
+        background: white;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 1rem;
+        margin: 1.5rem 0;
+      }
+      .screen > h2 {
+        margin-top: 0;
+      }
+      .meta {
+        color: var(--muted);
+        font-size: 0.9rem;
+      }
+      .state {
+        border-top: 1px dashed var(--line);
+        padding: 1rem 0;
+      }
+      .state > h3 {
+        margin: 0 0 0.5rem;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--muted);
+      }
+      table {
+        border-collapse: collapse;
+        width: 100%;
+      }
+      th,
+      td {
+        text-align: left;
+        border-bottom: 1px solid var(--line);
+        padding: 0.4rem 0.5rem;
+      }
+      .ready {
+        color: var(--ready);
+        font-weight: 600;
+      }
+      .gap {
+        color: var(--gap);
+        font-weight: 600;
+      }
+      button {
+        font: inherit;
+        padding: 0.4rem 0.8rem;
+      }
+      form.inline {
+        display: grid;
+        gap: 0.5rem;
+        max-width: 420px;
+        margin-top: 1rem;
+      }
+      label {
+        display: grid;
+        gap: 0.2rem;
+        font-size: 0.9rem;
+      }
+      input,
+      select {
+        font: inherit;
+        padding: 0.35rem;
+      }
+      .notice {
+        padding: 0.6rem 0.8rem;
+        border-radius: 6px;
+        background: var(--paper);
+      }
+      .notice.error {
+        color: var(--gap);
+        background: #fff1f1;
+      }
+      .topnav a {
+        margin-right: 1rem;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Story 0001 — Employees, Roles and Required Qualifications</h1>
+      <p>
+        Step 2 · Design · Owner: Designer · Notes and Done when list in <code>2-design.md</code>
+      </p>
+      <nav>
+        <a href="#screen-employees">Employees</a>
+        <a href="#screen-employee">Employee</a>
+        <a href="#screen-roles">Roles</a>
+        <a href="#screen-role">Role</a>
+        <a href="#screen-qualifications">Qualifications</a>
+      </nav>
+      <p class="meta">
+        Every screen shares this application header:
+        <span class="topnav"
+          ><strong>Northstar</strong> <a href="#">Employees</a> <a href="#">Roles</a>
+          <a href="#">Qualifications</a></span
+        >
+      </p>
+    </header>
+
+    <main>
+      <section class="screen" id="screen-employees">
+        <h2>Employees</h2>
+        <p class="meta">
+          Route: <code>/employees?site=&lt;siteId&gt;</code> · Covers criteria: 1, 4 · Components:
+          Layout, Notice
+        </p>
+
+        <div class="state">
+          <h3>Default</h3>
+          <form class="inline" style="max-width: 320px">
+            <label
+              >Site
+              <select>
+                <option>All Sites</option>
+                <option selected>Vilnius North</option>
+                <option>Kaunas Hub</option>
+              </select>
+            </label>
+          </form>
+          <table>
+            <thead>
+              <tr>
+                <th>Employee</th>
+                <th>Site</th>
+                <th>Roles</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><a href="#screen-employee">Ada Example</a></td>
+                <td>Vilnius North</td>
+                <td>Forklift operator, Shift lead</td>
+              </tr>
+              <tr>
+                <td><a href="#screen-employee">Jonas Example</a></td>
+                <td>Vilnius North</td>
+                <td>—</td>
+              </tr>
+            </tbody>
+          </table>
+          <form class="inline">
+            <h4>Add Employee</h4>
+            <label>Full name <input placeholder="Full name" /></label>
+            <label
+              >Site
+              <select>
+                <option>Vilnius North</option>
+                <option>Kaunas Hub</option>
+              </select>
+            </label>
+            <button>Add Employee</button>
+          </form>
+        </div>
+
+        <div class="state">
+          <h3>Validation error</h3>
+          <p class="notice error">Full name is required.</p>
+        </div>
+
+        <div class="state">
+          <h3>Empty</h3>
+          <p class="notice">No Employees at this Site yet. Add the first one below.</p>
+        </div>
+
+        <div class="state">
+          <h3>Loading</h3>
+          <p>Loading Employees…</p>
+        </div>
+
+        <div class="state">
+          <h3>Error</h3>
+          <p class="notice error">
+            Employees could not be loaded. Reload the page or check the database.
+          </p>
+        </div>
+      </section>
+
+      <section class="screen" id="screen-employee">
+        <h2>Employee</h2>
+        <p class="meta">
+          Route: <code>/employees/&lt;id&gt;</code> · Covers criteria: 3, 6 · Components: Layout,
+          Notice
+        </p>
+
+        <div class="state">
+          <h3>Default</h3>
+          <h4>Ada Example <span class="meta">· Site: Vilnius North</span></h4>
+          <table>
+            <thead>
+              <tr>
+                <th>Role</th>
+                <th>Required Qualifications</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Forklift operator</td>
+                <td>Forklift licence, Safety briefing</td>
+                <td><button>Remove</button></td>
+              </tr>
+              <tr>
+                <td>Shift lead</td>
+                <td>Safety briefing, First aid</td>
+                <td><button>Remove</button></td>
+              </tr>
+            </tbody>
+          </table>
+          <p>
+            <strong>Required Qualifications (all Roles):</strong> Forklift licence, Safety briefing,
+            First aid
+          </p>
+          <form class="inline">
+            <label
+              >Give Role
+              <select>
+                <option>Warehouse picker</option>
+              </select>
+            </label>
+            <button>Give Role</button>
+          </form>
+        </div>
+
+        <div class="state">
+          <h3>Empty</h3>
+          <p class="notice">No Roles yet. Give a Role below.</p>
+        </div>
+
+        <div class="state">
+          <h3>Loading</h3>
+          <p>Loading Employee…</p>
+        </div>
+
+        <div class="state">
+          <h3>Not found / Error</h3>
+          <p class="notice error">Employee not found. Back to Employees.</p>
+        </div>
+      </section>
+
+      <section class="screen" id="screen-roles">
+        <h2>Roles</h2>
+        <p class="meta">
+          Route: <code>/roles</code> · Covers criteria: 2 · Components: Layout, Notice
+        </p>
+
+        <div class="state">
+          <h3>Default</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Role</th>
+                <th>Required Qualifications</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><a href="#screen-role">Forklift operator</a></td>
+                <td>2</td>
+              </tr>
+            </tbody>
+          </table>
+          <form class="inline">
+            <h4>Add Role</h4>
+            <label>Name <input placeholder="Role name" /></label>
+            <fieldset>
+              <legend>Required Qualifications</legend>
+              <label><input type="checkbox" checked /> Forklift licence</label>
+              <label><input type="checkbox" checked /> Safety briefing</label>
+              <label><input type="checkbox" /> First aid</label>
+            </fieldset>
+            <button>Add Role</button>
+          </form>
+        </div>
+
+        <div class="state">
+          <h3>Empty</h3>
+          <p class="notice">No Roles yet. Add the first one below.</p>
+        </div>
+
+        <div class="state">
+          <h3>Loading</h3>
+          <p>Loading Roles…</p>
+        </div>
+
+        <div class="state">
+          <h3>Error</h3>
+          <p class="notice error">Roles could not be loaded.</p>
+        </div>
+      </section>
+
+      <section class="screen" id="screen-role">
+        <h2>Role</h2>
+        <p class="meta">
+          Route: <code>/roles/&lt;id&gt;</code> · Covers criteria: 2 · Components: Layout, Notice
+        </p>
+
+        <div class="state">
+          <h3>Default</h3>
+          <h4>Forklift operator</h4>
+          <ul>
+            <li>Forklift licence</li>
+            <li>Safety briefing</li>
+          </ul>
+        </div>
+
+        <div class="state">
+          <h3>Empty</h3>
+          <p class="notice">
+            No Required Qualifications. Every Employee is ready for this Role by default.
+          </p>
+        </div>
+
+        <div class="state">
+          <h3>Loading</h3>
+          <p>Loading Role…</p>
+        </div>
+
+        <div class="state">
+          <h3>Not found / Error</h3>
+          <p class="notice error">Role not found. Back to Roles.</p>
+        </div>
+      </section>
+
+      <section class="screen" id="screen-qualifications">
+        <h2>Qualifications</h2>
+        <p class="meta">
+          Route: <code>/qualifications</code> · Covers criteria: 5 · Components: Layout, Notice
+        </p>
+
+        <div class="state">
+          <h3>Default</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Qualification</th>
+                <th>Required by Roles</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Forklift licence</td>
+                <td>1</td>
+              </tr>
+            </tbody>
+          </table>
+          <form class="inline">
+            <h4>Add Qualification</h4>
+            <label>Name <input placeholder="Qualification name" /></label>
+            <button>Add Qualification</button>
+          </form>
+        </div>
+
+        <div class="state">
+          <h3>Empty</h3>
+          <p class="notice">No Qualifications yet. Add the first one below.</p>
+        </div>
+
+        <div class="state">
+          <h3>Loading</h3>
+          <p>Loading Qualifications…</p>
+        </div>
+
+        <div class="state">
+          <h3>Error</h3>
+          <p class="notice error">Qualifications could not be loaded.</p>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>
