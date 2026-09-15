@@ -34,13 +34,13 @@ Rules that hold regardless of stack:
 
 ### 2 Current pipeline
 
-The loop the agent runs on every task. Each step ends on a checkable state.
+How a change travels from idea to shipped. Five stages, each owned by one role and ending on a checkable state. The agent works inside the Development team stage; in the other stages it drafts when asked and the named role signs off.
 
-1. **Orient** — read the task, the touched modules, and the nearest tests. Done when the agent can name the files that will change and the behaviour that proves the change.
-2. **Plan** — for anything beyond a one-file fix, write the plan as a numbered list of vertical slices before editing. Done when each slice has a test or observable outcome attached.
-3. **Build in tracer bullets** — implement one thin end-to-end slice, run it, then widen. Done when the slice passes its own check.
-4. **Verify with the real gate** — run the same commands CI runs, locally, before declaring anything finished. Done when the gate is green or the failure is reported verbatim.
-5. **Hand off** — produce the artifacts in section 3.
+1. **Product Owner writes the story** — one idea as a user story with acceptance criteria, filed as a GitLab issue in the language of `docs/domain.md`. Done when every acceptance criterion can be read as a test.
+2. **Designer prepares the design** — screens and states for the story, linked from the issue (tool: `TODO(project)`, default Figma). Done when every acceptance criterion has a screen or an explicit "no UI" note.
+3. **Product Owner confirms the design and refines with the Development team** — the team walks the story and design together, splits it into vertical slices, and records open questions on the issue. Done when the PO has approved the design and each slice has a test or observable outcome attached.
+4. **Development team implements** — the agent's loop: orient on the touched modules and nearest tests, build one thin end-to-end slice, run it, widen, then run the gate below and prepare the handoff artifacts in section 3. Done when the gate is green on a merge request that names the issue.
+5. **Product Owner reviews the final change** — checks the merge request against the acceptance criteria and the approved design. Done when the PO accepts, or sends it back to stage 3 with what is missing.
 
 The gate. `pnpm gate` runs every row below in order and is what CI runs; the scripts in `package.json` are the source of truth.
 
