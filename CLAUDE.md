@@ -34,15 +34,15 @@ What the system is, technically, in one screen.
 
 ### 2 Current pipeline
 
-How a change travels from idea to shipped. Each step is a separate task with one owner, one input and one output, so steps run at different times and by different people. To work one step, name it: the agent reads the step's input, produces its output, and stops; the owner signs off before the next step starts. The agent works in step 4 by default and drafts any other step when asked.
+How a story travels from idea to shipped. Each step is a separate task with one owner, one input file and one output file in the story folder `docs/stories/NNNN-<slug>/`, so steps run at different times and by different people. To work one step, name the story and the step: the agent reads the step's input file, writes the step's file from its template, and stops; the owner ticks its _Done when_ list before the next step starts. The agent works in step 4 by default and drafts any other step when asked.
 
-| Step             | Owner                                   | Starts when                | Produces                                                                                                                                   | Done when                                                           |
-| ---------------- | --------------------------------------- | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------- |
-| 1 Story          | Product Owner                           | an idea is worth building  | a GitLab issue: user story and acceptance criteria in the language of `docs/domain.md`                                                     | every acceptance criterion reads as a test                          |
-| 2 Design         | Designer                                | the issue exists           | screens and states for the story, linked from the issue (tool: `TODO(project)`, default Figma)                                             | every acceptance criterion has a screen or an explicit "no UI" note |
-| 3 Refinement     | Product Owner with the Development team | the design is linked       | PO approval of the design; the story split into vertical slices listed on the issue, open questions answered there                         | each slice has a test or observable outcome attached                |
-| 4 Implementation | Development team                        | the slices are listed      | a merge request naming the issue, built one slice at a time: orient, thin end-to-end slice, run, widen, gate, then the section 3 artifacts | the gate is green and every section 3 artifact exists               |
-| 5 Review         | Product Owner                           | the merge request is green | acceptance, or one comment per missing criterion that returns the issue to step 3                                                          | the PO has accepted the merge request                               |
+| Step             | Owner                                   | Starts when                 | Produces                                                                                                                                      | Done when                                                           |
+| ---------------- | --------------------------------------- | --------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------- |
+| 1 Story          | Product Owner                           | an idea is worth building   | `1-story.md`: user story, manager question and numbered acceptance criteria in the language of `docs/domain.md`                               | every acceptance criterion reads as a test                          |
+| 2 Design         | Designer                                | `1-story.md` is ticked      | `2-design.md`: a screen or "no UI" note per criterion, states, copy, linked design file (tool: `TODO(project)`, default Figma)                | every acceptance criterion has a screen or an explicit "no UI" note |
+| 3 Refinement     | Product Owner with the Development team | `2-design.md` is ticked     | `3-refinement.md`: PO approval of the design, open questions answered, the story split into vertical slices                                   | each slice has a test or observable outcome attached                |
+| 4 Implementation | Development team                        | `3-refinement.md` is ticked | `4-implementation.md` and a merge request naming the story folder, built one slice at a time: orient, thin end-to-end slice, run, widen, gate | the gate is green and every section 3 artifact exists               |
+| 5 Review         | Product Owner                           | the merge request is green  | `5-review.md`: criteria walk, design check and verdict; open rows return the story to step 3                                                  | the PO has accepted the merge request                               |
 
 The gate. `pnpm gate` runs every row below in order and is what CI runs; the scripts in `package.json` are the source of truth.
 
@@ -62,14 +62,18 @@ Pipeline runs on GitLab CI for every push and merge request. Review approvals re
 
 ### 3 Handoff artifacts
 
-Work is finished when every item below exists. Nothing here is optional.
+Every step ends in one file in the story folder, copied from `docs/stories/0000-template/`; the folder is the issue, and `docs/stories/README.md` holds the rules. A step is finished when its file exists and every box in its _Done when_ list is ticked by the step's owner. Nothing here is optional: a missing file is an **Ask** (section 5), never a guess.
 
-- **Green working tree** — the gate in section 2 passed on the final state, and the agent quotes the command it ran.
-- **Change summary** in this shape, in the PR description or final message:
-  - _What changed_ — files and behaviour, one line each.
-  - _Why_ — the task and the decision path, including alternatives rejected.
-  - _How verified_ — commands run and their result.
-  - _Left open_ — anything skipped, assumed, or needing a human, stated explicitly.
+| Step | File                  | Carries                                                                                   |
+| ---- | --------------------- | ----------------------------------------------------------------------------------------- |
+| 1    | `1-story.md`          | user story, manager question, numbered acceptance criteria tagged must-ship, out of scope |
+| 2    | `2-design.md`         | design link, screen per criterion, states, copy, components, open questions               |
+| 3    | `3-refinement.md`     | design approval, answers, vertical slices with their checks, decisions expected           |
+| 4    | `4-implementation.md` | slice log, change summary, demo path, records produced, the gate command quoted           |
+| 5    | `5-review.md`         | criteria walk, design check, verdict                                                      |
+
+Step 4 also owes, outside the story folder:
+
 - **Decision record** in `docs/decisions/` (copy `0000-template.md`) whenever the work chose between architectures, introduced a dependency, changed a schema, or altered a public interface. One file per decision, dated, with context, decision, consequences.
 - **Contract revision** in `docs/contracts/` whenever a shape another team consumes changed, with the version bumped and an example payload.
 - **Docs kept true** — any README, runbook, or this file that described the old behaviour now describes the new one.
@@ -109,6 +113,7 @@ Conventions the tree cannot state for itself. Layout is discoverable; read the t
 - **Branches** — `TODO(project)` (default: `<type>/<ticket>-<short-slug>`).
 - **Commits** — `TODO(project)` (default: conventional commits, imperative subject under 72 chars, body explains why).
 - **PR size** — one concern per PR. Split rather than stack unrelated changes.
+- **Stories** — `docs/stories/NNNN-<slug>/`, one file per pipeline step, template folder at `0000-template/`.
 - **Decision records** — `docs/decisions/NNNN-<slug>.md`, template at `0000`.
 - **Contracts** — `docs/contracts/<shape>.md`, one file per cross-repo shape.
 - **Runbooks and design notes** — `docs/`.
@@ -120,6 +125,7 @@ Conventions the tree cannot state for itself. Layout is discoverable; read the t
 Pointers to disclosed material, reached only when the task needs them:
 
 - Domain glossary and feature map → `docs/domain.md`. Read before modelling anything.
+- Story folder rules and step templates → `docs/stories/README.md`. Read before starting or continuing a story.
 - Cross-repo shapes → `docs/contracts/`. Read before calling or exposing anything another team owns.
 - Module shape and dependency direction → `docs/architecture.md`. Read before adding a folder or crossing one.
 - Stack decision and its rejected alternatives → `docs/decisions/0001-astro-ssr-drizzle-libsql.md`.
