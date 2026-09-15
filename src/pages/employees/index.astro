@@ -1,0 +1,84 @@
+---
+// Employees: list by Site and add an Employee. Story 0001, criteria 1 and 4.
+import { actions } from 'astro:actions';
+import Layout from '../../components/Layout.astro';
+import Notice from '../../components/Notice.astro';
+import { actionMessage } from '../../actions/message';
+import { listEmployees, listSites } from '../../db/people';
+
+const result = Astro.getActionResult(actions.addEmployee);
+if (result && !result.error) {
+  const back = new URL(Astro.url);
+  back.searchParams.delete('_action');
+  return Astro.redirect(back.pathname + back.search);
+}
+const error = result?.error ? actionMessage(result.error) : null;
+
+const siteId = Astro.url.searchParams.get('site') || undefined;
+const [sites, employees] = await Promise.all([listSites(), listEmployees(siteId)]);
+const site = sites.find((s) => s.id === siteId);
+const scope = site ? ` at ${site.name}` : '';
+---
+
+<Layout title="Employees">
+  <form class="filter" method="get">
+    <label>
+      Site
+      <select name="site" onchange="this.form.submit()">
+        <option value="">All Sites</option>
+        {sites.map((s) => (
+          <option value={s.id} selected={s.id === siteId}>
+            {s.name}
+          </option>
+        ))}
+      </select>
+    </label>
+    <noscript>
+      <button>Filter</button>
+    </noscript>
+  </form>
+
+  {employees.length === 0 ? (
+    <Notice>No Employees{scope} yet. Add the first one below.</Notice>
+  ) : (
+    <table>
+      <thead>
+        <tr>
+          <th>Employee</th>
+          <th>Site</th>
+          <th>Roles</th>
+        </tr>
+      </thead>
+      <tbody>
+        {employees.map((e) => (
+          <tr>
+            <td>
+              <a href={`/employees/${e.id}`}>{e.fullName}</a>
+            </td>
+            <td>{e.site.name}</td>
+            <td>{e.roleNames.length > 0 ? e.roleNames.join(', ') : '—'}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  )}
+
+  <form class="inline" method="post" action={actions.addEmployee}>
+    <h2>Add Employee</h2>
+    {error && <Notice kind="error">{error}</Notice>}
+    <label>
+      Full name <input name="fullName" required />
+    </label>
+    <label>
+      Site
+      <select name="siteId" required>
+        {sites.map((s) => (
+          <option value={s.id} selected={s.id === siteId}>
+            {s.name}
+          </option>
+        ))}
+      </select>
+    </label>
+    <button>Add Employee</button>
+  </form>
+</Layout>

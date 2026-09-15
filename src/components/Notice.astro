@@ -1,0 +1,11 @@
+---
+// One inline message for empty, error and validation states.
+interface Props {
+  kind?: 'empty' | 'error';
+}
+const { kind = 'empty' } = Astro.props;
+---
+
+<p class:list={['notice', kind]} role={kind === 'error' ? 'alert' : undefined}>
+  <slot />
+</p>

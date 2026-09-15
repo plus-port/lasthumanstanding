@@ -19,6 +19,7 @@
     "gate": "pnpm check && pnpm lint && pnpm format:check && pnpm test && pnpm build",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
+    "db:seed": "node scripts/seed.ts",
     "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
